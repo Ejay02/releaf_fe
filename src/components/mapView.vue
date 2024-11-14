@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen w-full">
-    <!-- <LoadingScreen v-if="loading" /> -->
+    <!-- Map Container -->
     <div id="map" class="h-full w-full"></div>
   </div>
 </template>
@@ -10,26 +10,30 @@ import { onMounted, ref } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { fetchMillData } from "../utils/dataService";
+import { useNotifications } from "../composables/globalAlert";
 
 // Leaflet marker icons
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import { useNotifications } from "../composables/globalAlert";
-// import LoadingScreen from "./loadingScreen.vue";
+import api from "../composables/apiService";
 
+// Use notifications for success/error messages
 const { notify } = useNotifications();
 
-// Set default marker icons
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIcon2x,
-  shadowUrl: markerShadow,
-});
-
+// Define mills data and map reference
 const mills = ref([]);
 let map = null;
+
+// Set default marker icons
+const setMarkerIcons = () => {
+  delete L.Icon.Default.prototype._getIconUrl; // Remove default icon
+  L.Icon.Default.mergeOptions({
+    iconUrl: markerIcon,
+    iconRetinaUrl: markerIcon2x,
+    shadowUrl: markerShadow,
+  });
+};
 
 // Get status color based on last transaction date
 const getStatusColor = (lastTransactionDate) => {
@@ -38,55 +42,61 @@ const getStatusColor = (lastTransactionDate) => {
   return diffDays <= 7 ? "green" : diffDays <= 14 ? "yellow" : "red";
 };
 
-// Initialize map and add markers
+// Initialize map and add markers for mills
 const initializeMap = () => {
-  map = L.map("map").setView([5.587366, 8.133794], 13);
+  map = L.map("map").setView([5.587366, 8.133794], 13); // Set initial view of the map
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap contributors",
   }).addTo(map);
 
-  // Add mill markers
+  // Add mill markers to the map
   mills.value.forEach((mill) => {
-    const marker = L.marker([mill.latitude, mill.longitude]).addTo(map);
-
-    // Create popup content with status indicator
-    const statusColor = getStatusColor(mill.lastTransactionDate);
-    const popupContent = `
-      <div class="p-4 cursor-pointer">
-        <h3 class="font-bold text-lg mb-2">${mill.millName}</h3>
-        <div class="flex items-center mb-2">
-          <span class="w-3 h-3 rounded-full mr-2" style="background-color: ${statusColor}"></span>
-          <span>Status</span>
-        </div>
-        <div class="space-y-1">
-          <p><span class="font-semibold">P1 Amount:</span> ${
-            mill.p1Amount
-          } tons</p>
-          <p><span class="font-semibold">Price per ton:</span> $${
-            mill.p1PriceTon
-          }</p>
-          <p><span class="font-semibold">Transactions:</span> ${
-            mill.numTransactions
-          }</p>
-          <p><span class="font-semibold">Last Transaction:</span> ${new Date(
-            mill.lastTransactionDate
-          ).toLocaleDateString()}</p>
-        </div>
-      </div>
-    `;
-
-    marker.bindPopup(popupContent);
+    addMillMarker(mill);
   });
 
-  // Add click handler for adding PKS dumpsites
+  // Add click event to map for adding PKS dumpsites
   map.on("click", (e) => {
     const { lat, lng } = e.latlng;
-    addPKSDumpsite(lat, lng);
+    addPKSDumpsite(lat, lng); // Add PKS dumpsite marker on map click
   });
 };
 
-// Function to add new PKS dumpsite
+// Add mill marker with status and popup content
+const addMillMarker = (mill) => {
+  const marker = L.marker([mill.latitude, mill.longitude]).addTo(map);
+  const statusColor = getStatusColor(mill.lastTransactionDate);
+
+  // Create the popup content for each mill
+  const popupContent = `
+    <div class="p-4 cursor-pointer">
+      <h3 class="font-bold text-lg mb-2">${mill.millName}</h3>
+      <div class="flex items-center mb-2">
+        <span class="w-3 h-3 rounded-full mr-2" style="background-color: ${statusColor}"></span>
+        <span>Status</span>
+      </div>
+      <div class="space-y-1">
+        <p><span class="font-semibold">P1 Amount:</span> ${
+          mill.p1Amount
+        } tons</p>
+        <p><span class="font-semibold">Price per ton:</span> $${
+          mill.p1PriceTon
+        }</p>
+        <p><span class="font-semibold">Transactions:</span> ${
+          mill.numTransactions
+        }</p>
+        <p><span class="font-semibold">Last Transaction:</span> ${new Date(
+          mill.lastTransactionDate
+        ).toLocaleDateString()}</p>
+      </div>
+    </div>
+  `;
+
+  // Bind the popup to the marker
+  marker.bindPopup(popupContent);
+};
+
+// Add a PKS dumpsite marker with form for details
 const addPKSDumpsite = (lat, lng) => {
   const marker = L.marker([lat, lng]).addTo(map);
 
@@ -113,9 +123,10 @@ const addPKSDumpsite = (lat, lng) => {
     </div>
   `;
 
+  // Bind the form content to the marker popup
   marker.bindPopup(formContent).openPopup();
 
-  // Handle form submission
+  // Handle form submission for PKS dumpsite
   setTimeout(() => {
     const form = document.getElementById("dumpsiteForm");
     if (form) {
@@ -123,34 +134,49 @@ const addPKSDumpsite = (lat, lng) => {
         e.preventDefault();
         const formData = new FormData(form);
 
-        // Save dumpsite data (implement API call here)
+        // Collect dumpsite data from the form
         const dumpsiteData = {
           latitude: lat,
           longitude: lng,
-          capacity: formData.get("capacity"),
+          capacity: parseFloat(formData.get("capacity")),
           status: formData.get("status"),
         };
 
-        console.log("Saving dumpsite:", dumpsiteData);
-        notify("Dumpsite created", "success");
-        // TODO: Implement API call to save dumpsite
-        marker.closePopup();
+        const token = localStorage.getItem("accessToken");
+
+        try {
+          // Make a POST request to save the dumpsite data
+          const res = await api.post("/dumpsites", dumpsiteData, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach the token to the request
+            },
+          });
+
+          if (res.data) {
+            notify("Dumpsite created successfully", "success");
+            marker.closePopup(); // Close popup after form submission
+          }
+        } catch (error) {
+          notify("Error saving dumpsite", "error");
+        }
       };
     }
   }, 100);
 };
 
+// Fetch mill data and initialize map
 onMounted(async () => {
   try {
-    mills.value = await fetchMillData();
-    initializeMap();
+    mills.value = await fetchMillData(); // Fetch mill data from API
+    setMarkerIcons(); // Set the marker icons
+    initializeMap(); // Initialize map with markers
   } catch (error) {
-    notify("Failed to initialize map", "error");
+    notify("Failed to initialize map", "error"); // Show error notification if fetching mills fails
   }
 });
 </script>
 
-<style>
+<style scoped>
 @import "leaflet/dist/leaflet.css";
 
 .leaflet-popup-content-wrapper {

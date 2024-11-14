@@ -1,9 +1,8 @@
 <template>
-  <MapView />
+ 
+  <RouterView />
 </template>
 
 <script setup>
-import MapView from '@/components/mapView.vue';
-
 
 </script>

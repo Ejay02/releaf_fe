@@ -1,0 +1,117 @@
+<template>
+  <div
+    class="relative min-h-screen bg-cover bg-center flex items-center justify-center"
+    :style="{ backgroundImage: `url(${backgroundImage})` }"
+  >
+    <!-- Overlay for dimming the background image -->
+    <div class="absolute inset-0 bg-black opacity-50"></div>
+
+    <!-- Signup Form Container -->
+    <div
+      class="relative z-10 bg-white bg-opacity-80 rounded-lg p-8 max-w-md w-full text-center shadow-lg"
+    >
+      <h1 class="text-2xl font-semibold text-gray-800 mb-4">Welcome</h1>
+      <p class="text-gray-600 mb-6">Sign in or sign up to continue</p>
+
+      <!-- Login Form -->
+      <form class="space-y-4" @submit.prevent="">
+        <input
+          v-model="username"
+          type="text"
+          placeholder="Username"
+          autofocus
+          class="w-full px-4 py-2 text-sm text-gray-800 bg-white border rounded-lg focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+        />
+        <input
+          v-model="email"
+          type="email"
+          placeholder="Email"
+          class="w-full px-4 py-2 text-sm text-gray-800 bg-white border rounded-lg focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+        />
+        <div class="relative">
+          <input
+            :type="showPassword ? 'text' : 'password'"
+            id="password"
+            v-model="password"
+            required
+            placeholder="Password"
+            minlength="8"
+            class="w-full px-4 py-2 text-sm text-gray-800 bg-white border rounded-lg focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <button
+            type="button"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"
+            @click="togglePasswordVisibility('password')"
+          >
+            <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+        </div>
+
+        <button
+          @click="handleSignUp"
+          type="submit"
+          :disabled="isDisabled"
+          :class="[
+            'w-full py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+            isDisabled
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-indigo-600 hover:bg-indigo-700 text-white',
+          ]"
+        >
+          Sign Up
+        </button>
+
+        <p class="text-sm text-gray-600">
+          Have an account?
+          <a href="/" class="text-indigo-600 hover:underline">Log In</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+import api from "../composables/apiService";
+import backgroundImage from "@/assets/earth.jpg";
+import { useNotifications } from "../composables/globalAlert";
+
+const email = ref("");
+const username = ref("");
+const password = ref("");
+const router = useRouter();
+
+const { notify } = useNotifications();
+
+const isDisabled = computed(() => {
+  return email.value.trim() === "" || password.value.trim() === "";
+});
+
+const showPassword = ref(false);
+
+const togglePasswordVisibility = (field) => {
+  if (field === "password") {
+    showPassword.value = !showPassword.value;
+  }
+};
+
+const handleSignUp = async () => {
+  try {
+    const res = await api.post("user/register", {
+      email: email.value,
+      password: password.value,
+      username: username.value,
+    });
+
+    if (res.data) {
+      notify("Sign up successful", "success");
+      router.push("/");
+    }
+  } catch (error) {
+    notify("Signup Error", "error");
+  }
+};
+</script>
+
+<style scoped></style>
