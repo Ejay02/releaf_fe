@@ -6,6 +6,7 @@ import SignUp from "@/views/signup.vue";
 import Dashboard from "../views/dashboard.vue";
 import Mills from "../components/mills.vue";
 import Dumpsites from "../components/dumpsites.vue";
+import NotFound from "../components/error/notFound.vue";
 
 const routes = [
   {
@@ -32,6 +33,12 @@ const routes = [
     path: "/dumpsites",
     name: "Dumpsites",
     component: Dumpsites,
+  },
+  {
+    // path: "*",
+    path: "/:catchAll(.*)",
+    name: "NotFound",
+    component: NotFound,
   },
 ];
 
