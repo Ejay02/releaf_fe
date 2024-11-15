@@ -63,7 +63,7 @@
 
         <p class="text-sm text-gray-600">
           Don’t have an account?
-          <a href="/signup" class="text-indigo-600 hover:underline">Sign up</a>
+          <router-link to="/signup" class="text-indigo-600 hover:underline">Sign up</router-link>
         </p>
       </form>
     </div>

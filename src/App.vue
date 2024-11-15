@@ -1,5 +1,5 @@
 <template>
-  <NavBar v-if="$route.path !== '/'" />
+  <NavBar v-if="$route.path !== '/' && $route.path !== '/signup'" />
   <RouterView class="" />
 </template>
 

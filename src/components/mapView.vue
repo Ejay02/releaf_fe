@@ -189,7 +189,7 @@ onMounted(async () => {
     });
   } catch (error) {
     console.log("error:", error);
-    notify("Failed to initialize map", "error");
+    // notify("Failed to initialize map", "error");
     isLoading.value = false;
   }
 });

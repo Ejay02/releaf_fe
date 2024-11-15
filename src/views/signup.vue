@@ -66,7 +66,9 @@
 
         <p class="text-sm text-gray-600">
           Have an account?
-          <a href="/" class="text-indigo-600 hover:underline">Log In</a>
+          <router-link to="/" class="text-indigo-600 hover:underline"
+            >Log In</router-link
+          >
         </p>
       </form>
     </div>
