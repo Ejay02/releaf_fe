@@ -2,21 +2,18 @@
   <nav class="bg-indigo-600 text-white p-4 shadow-md relative z-20">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <!-- Dashboard link -->
-      <div class="text-2xl font-bold">
-        <router-link to="/dashboard" class="text-white">Dashboard</router-link>
-      </div>
+      <router-link to="/dashboard" class="text-2xl font-bold text-white">
+        Dashboard
+      </router-link>
 
-      <!-- -->
-      <div class="flex items-center space-x-8">
-        <!-- Mills -->
-        <router-link to="/mills" class="flex justify-center">Mills</router-link>
-
-        <!-- Dumpsites -->
-        <router-link to="/dumpsites" class="flex justify-center"
+      <!-- Navigation links -->
+      <div class="flex items-center space-x-4 md:space-x-8">
+        <router-link to="/mills" class="text-sm md:text-base"
+          >Mills</router-link
+        >
+        <router-link to="/dumpsites" class="text-sm md:text-base"
           >Dumpsites</router-link
         >
-
-        <!-- Dropdown -->
         <div class="relative">
           <button
             class="text-white flex items-center space-x-2"
@@ -54,5 +51,4 @@ const toggleDropdown = () => {
 };
 
 const user = userStore.user;
-
 </script>
