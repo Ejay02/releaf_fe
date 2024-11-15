@@ -3,6 +3,9 @@
     class="relative min-h-screen bg-cover bg-center flex items-center justify-center"
     :style="{ backgroundImage: `url(${backgroundImage})` }"
   >
+    <!-- Loading Screen -->
+    <LoadingScreen v-if="isLoading" />
+
     <!-- Overlay for dimming the background image -->
     <div class="absolute inset-0 bg-black opacity-50"></div>
 
@@ -50,15 +53,15 @@
         <button
           @click="handleSignUp"
           type="submit"
-          :disabled="isDisabled"
+          :disabled="isDisabled || isLoading"
           :class="[
             'w-full py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
-            isDisabled
+            isDisabled || isLoading
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-indigo-600 hover:bg-indigo-700 text-white',
           ]"
         >
-          Sign Up
+          {{ isLoading ? "Signing up..." : "Sign Up" }}
         </button>
 
         <p class="text-sm text-gray-600">
@@ -75,12 +78,14 @@ import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import api from "../composables/apiService";
 import backgroundImage from "@/assets/earth.jpg";
+import LoadingScreen from "../components/loadingScreen.vue";
 import { useNotifications } from "../composables/globalAlert";
 
 const email = ref("");
 const username = ref("");
 const password = ref("");
 const router = useRouter();
+const isLoading = ref(false);
 
 const { notify } = useNotifications();
 
@@ -98,6 +103,7 @@ const togglePasswordVisibility = (field) => {
 
 const handleSignUp = async () => {
   try {
+    isLoading.value = true;
     const res = await api.post("user/register", {
       email: email.value,
       password: password.value,
@@ -110,6 +116,8 @@ const handleSignUp = async () => {
     }
   } catch (error) {
     notify("Signup Error", "error");
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>

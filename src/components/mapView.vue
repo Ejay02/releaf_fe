@@ -1,22 +1,29 @@
 <template>
   <div class="h-screen w-full">
+    <!-- Loading Screen -->
+    <LoadingScreen
+      v-if="isLoading"
+      :msg="'Please wait while we fetch the mill locations'"
+    />
+
     <!-- Map Container -->
     <div id="map" class="h-full w-full"></div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { onMounted, ref } from "vue";
+import api from "../composables/apiService";
+import LoadingScreen from "./loadingScreen.vue";
 import { fetchMillData } from "../utils/dataService";
 import { useNotifications } from "../composables/globalAlert";
 
 // Leaflet marker icons
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import api from "../composables/apiService";
 
 // Use notifications for success/error messages
 const { notify } = useNotifications();
@@ -24,6 +31,8 @@ const { notify } = useNotifications();
 // Define mills data and map reference
 const mills = ref([]);
 let map = null;
+
+const isLoading = ref(true);
 
 // Set default marker icons
 const setMarkerIcons = () => {
@@ -170,8 +179,16 @@ onMounted(async () => {
     mills.value = await fetchMillData(); // Fetch mill data from API
     setMarkerIcons(); // Set the marker icons
     initializeMap(); // Initialize map with markers
+
+    // event listener for when the map's tiles are loaded
+    map.whenReady(() => {
+      setTimeout(() => {
+        isLoading.value = false;
+      }, 500); // Small delay to ensure smooth transition
+    });
   } catch (error) {
-    notify("Failed to initialize map", "error"); // Show error notification if fetching mills fails
+    notify("Failed to initialize map", "error");
+    isLoading.value = false;
   }
 });
 </script>

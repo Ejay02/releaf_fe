@@ -1,6 +1,6 @@
 <template>
   <NavBar v-if="$route.path !== '/'" />
-  <RouterView />
+  <RouterView class="" />
 </template>
 
 <script setup>
