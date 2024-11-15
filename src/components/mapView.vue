@@ -181,6 +181,7 @@ onMounted(async () => {
     setMarkerIcons(); // Set the marker icons
     initializeMap(); // Initialize map with markers
   } catch (error) {
+    console.log('error:', error)
     notify("Failed to initialize map", "error"); // Show error notification if fetching mills fails
   }
 });
