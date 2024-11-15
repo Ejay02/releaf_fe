@@ -5,9 +5,9 @@
 
 <script setup>
 import { watch } from "vue";
-import { useUserStore } from "./stores/userStore";
-import NavBar from "@/components/NavBar.vue";
 import { useRoute } from "vue-router";
+import NavBar from "./components/navBar.vue";
+import { useUserStore } from "./stores/userStore";
 
 const userStore = useUserStore();
 const $route = useRoute();
