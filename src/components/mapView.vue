@@ -21,6 +21,7 @@ import { fetchMillData } from "../utils/dataService";
 import { useNotifications } from "../composables/globalAlert";
 
 // Leaflet marker icons
+import "leaflet/dist/leaflet.css";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
