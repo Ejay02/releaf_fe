@@ -1,6 +1,7 @@
-# PKS Map Manager (Frontend)
+# Interactive Web App for Mills and PKS Dumpsites: FrontEnd
 
 ## Description
+An interactive, responsive web app that displays and manages a set of map markers for mills and Palm Kernel Shell (PKS) dumpsites.
 
 PKS Map Manager (Frontend) is a web application that allows users to interact with a map of mills and PKS dumpsites. The app uses Leaflet for map visualization, with markers for mills and dumpsites, and enables users to add and edit dumpsite information. The front end is designed to be responsive, with a clean and accessible user interface using Vue.js, Tailwind CSS, and Axios.
 
