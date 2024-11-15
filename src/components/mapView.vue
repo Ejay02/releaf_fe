@@ -1,10 +1,10 @@
 <template>
   <div class="h-screen w-full">
     <!-- Loading Screen -->
-    <LoadingScreen
+    <!-- <LoadingScreen
       v-if="isLoading"
-      :msg="'Please wait while we fetch the mill locations'"
-    />
+      :msg="'Please wait ...'"
+    /> -->
 
     <!-- Map Container -->
     <div id="map" class="h-full w-full"></div>
@@ -16,7 +16,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { onMounted, ref } from "vue";
 import api from "../composables/apiService";
-import LoadingScreen from "./loadingScreen.vue";
+// import LoadingScreen from "./loadingScreen.vue";
 import { fetchMillData } from "../utils/dataService";
 import { useNotifications } from "../composables/globalAlert";
 
@@ -33,7 +33,7 @@ const { notify } = useNotifications();
 const mills = ref([]);
 let map = null;
 
-const isLoading = ref(true);
+// const isLoading = ref(true);
 
 // Set default marker icons
 const setMarkerIcons = () => {
