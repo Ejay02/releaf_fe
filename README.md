@@ -33,7 +33,6 @@ Clone the repository to your local machine:
 ```bash
 git clone https://github.com/Ejay02/releaf_fe.git
 ```
-````
 
 ### 2. Install dependencies
 
