@@ -5,21 +5,16 @@ An interactive, responsive web app that displays and manages a set of map marker
 
 The app is hosted on Netlify: [Live Site](https://releaf-demo.netlify.app)
 
-## Features
 
-- **Map Visualization**: Display mills and PKS dumpsites on an interactive map using Leaflet.
-- **Dumpsite Management**: Add, edit, and display dumpsite details.
-- **Pagination**: Navigate through lists of dumpsites and mills.
-- **User Authentication**: Sign in with email and password.
-- **Responsive Design**: Optimized for both desktop and mobile devices.
-- **State Management**: User data and app state are managed with Pinia.
-- **Data Fetching**: Axios is used for making HTTP requests to the backend API.
+ ## Frontend Architecture
+- **Framework**: Vue.js with Vite for efficient build and development.
+- **UI Styling**: Tailwind CSS for responsive and clean design.
+- **Map**: Leaflet.js is used to display an interactive map with markers for mills and PKS dumpsites. Users can click on the map to add new dumpsites.
+- **State Management**: Pinia is used for state management, allowing user data and map-related data (mills and dumpsites) to persist across pages.
+- **Data Fetching**: Axios is used to fetch data from the backend API, including mill and dumpsite information.
+- **Routing**: Vue Router is used for navigating between different pages (e.g., dumpsites and mills views).
+- **Notifications**: A custom notification system (useNotifications) to display success/error messages when adding mills or dumpsites.
 
-## Technologies Used
-
-- **Frontend**: Vue.js (with `<script setup>`), Tailwind CSS, Axios, Leaflet
-- **State Management**: Pinia
-- **API**: RESTful endpoints for dumpsite and mill data
 
 ## Setup
 
