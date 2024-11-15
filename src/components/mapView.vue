@@ -175,33 +175,33 @@ const addPKSDumpsite = (lat, lng) => {
 };
 
 // Fetch mill data and initialize map
-// onMounted(async () => {
-//   try {
-//     mills.value = await fetchMillData(); // Fetch mill data from API
-//     setMarkerIcons(); // Set the marker icons
-//     initializeMap(); // Initialize map with markers
-//   } catch (error) {
-//     notify("Failed to initialize map", "error"); // Show error notification if fetching mills fails
-//   }
-// });
 onMounted(async () => {
   try {
     mills.value = await fetchMillData(); // Fetch mill data from API
     setMarkerIcons(); // Set the marker icons
     initializeMap(); // Initialize map with markers
-
-    // event listener for when the map's tiles are loaded
-    map.whenReady(() => {
-      setTimeout(() => {
-        isLoading.value = false;
-      }, 500); // Small delay to ensure smooth transition
-    });
   } catch (error) {
-    console.log("error:", error);
-    // notify("Failed to initialize map", "error");
-    isLoading.value = false;
+    notify("Failed to initialize map", "error"); // Show error notification if fetching mills fails
   }
 });
+// onMounted(async () => {
+//   try {
+//     mills.value = await fetchMillData(); // Fetch mill data from API
+//     setMarkerIcons(); // Set the marker icons
+//     initializeMap(); // Initialize map with markers
+
+//     // event listener for when the map's tiles are loaded
+//     map.whenReady(() => {
+//       setTimeout(() => {
+//         isLoading.value = false;
+//       }, 500); // Small delay to ensure smooth transition
+//     });
+//   } catch (error) {
+//     console.log("error:", error);
+//     // notify("Failed to initialize map", "error");
+//     isLoading.value = false;
+//   }
+// });
 </script>
 
 <style scoped>
