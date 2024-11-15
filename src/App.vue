@@ -1,5 +1,5 @@
 <template>
-  <NavBar />
+  <NavBar v-if="$route.path !== '/'" />
   <RouterView />
 </template>
 
@@ -7,8 +7,10 @@
 import { watch } from "vue";
 import { useUserStore } from "./stores/userStore";
 import NavBar from "@/components/NavBar.vue";
+import { useRoute } from "vue-router";
 
 const userStore = useUserStore();
+const $route = useRoute();
 
 // Check if token is missing and log out the user if true
 watch(
