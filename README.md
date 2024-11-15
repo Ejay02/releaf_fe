@@ -1,11 +1,8 @@
-Here’s the extended version of your `README.md` with clear instructions on how to start the app and install dependencies:
-
-````markdown
 # PKS Map Manager (Frontend)
 
 ## Description
 
-PKS Map Manager (Frontend) is a web application that allows users to interact with a map of mills and PKS dumpsites. The app uses Leaflet for map visualization, with markers for mills and dumpsites, and allows users to add and edit dumpsite information. The frontend is designed to be responsive, with a clean and accessible user interface using Vue.js, Tailwind CSS, and Axios.
+PKS Map Manager (Frontend) is a web application that allows users to interact with a map of mills and PKS dumpsites. The app uses Leaflet for map visualization, with markers for mills and dumpsites, and enables users to add and edit dumpsite information. The front end is designed to be responsive, with a clean and accessible user interface using Vue.js, Tailwind CSS, and Axios.
 
 The app is hosted on Netlify: [Live Site](https://releaf-demo.netlify.app)
 
