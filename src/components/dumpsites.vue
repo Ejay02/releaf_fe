@@ -156,25 +156,11 @@
     </div>
 
     <!-- Pagination -->
-    <div
-      class="flex flex-col sm:flex-row justify-between items-center mt-4 space-y-2 sm:space-y-0"
-    >
-      <button
-        :disabled="currentPage <= 1"
-        @click="changePage(currentPage - 1)"
-        class="w-full sm:w-auto bg-gray-300 text-gray-700 py-1 px-3 rounded hover:bg-gray-400 disabled:opacity-50"
-      >
-        Previous
-      </button>
-      <span class="text-sm">Page {{ currentPage }} of {{ totalPages }}</span>
-      <button
-        :disabled="currentPage >= totalPages"
-        @click="changePage(currentPage + 1)"
-        class="w-full sm:w-auto bg-gray-300 text-gray-700 py-1 px-3 rounded hover:bg-gray-400 disabled:opacity-50"
-      >
-        Next
-      </button>
-    </div>
+    <Pagination
+      :items="dumpsites"
+      :itemsPerPage="5"
+      @pageChange="updateDumpsites"
+    />
 
     <!-- Add/Edit Modal -->
     <div
@@ -255,7 +241,7 @@
         </form>
       </div>
     </div>
-    <!-- ideally, all these should be in their individual component -->
+    <!-- ?? ideally, all these should be in their individual component -->
     <!-- Delete Modal -->
     <div
       v-if="showDeleteModal"
@@ -287,13 +273,13 @@
 </template>
 
 <script setup>
+import Pagination from "./pagination.vue";
 import api from "../composables/apiService";
 import { ref, computed, onMounted } from "vue";
 import { useNotifications } from "../composables/globalAlert";
 
 const dumpsites = ref([]);
-const currentPage = ref(1);
-const itemsPerPage = ref(5);
+const paginatedDumpsites = ref([]);
 const showModal = ref(false);
 const isEditing = ref(false);
 const editingId = ref(null);
@@ -310,15 +296,9 @@ const { notify } = useNotifications();
 
 const token = localStorage.getItem("accessToken");
 
-const totalPages = computed(() =>
-  Math.ceil(dumpsites.value.length / itemsPerPage.value)
-);
-
-const paginatedDumpsites = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  return dumpsites.value.slice(start, end);
-});
+const updateDumpsites = (items) => {
+  paginatedDumpsites.value = items;
+};
 
 const getStatusColor = (status) => {
   if (status.toLowerCase() === "active") {
@@ -446,10 +426,6 @@ const handleCreateDumpsite = async () => {
   }
 };
 
-const changePage = (newPage) => {
-  currentPage.value = newPage;
-};
-
 const isDisabled = computed(() => {
   return (
     formData.value.latitude === 0 ||
@@ -461,4 +437,6 @@ const isDisabled = computed(() => {
 onMounted(() => {
   handleFetchDumpsites();
 });
+
+// #TODO: refactor code, move modals/pages to individual components when im free
 </script>

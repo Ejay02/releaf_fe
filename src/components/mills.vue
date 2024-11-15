@@ -149,45 +149,22 @@
     </div>
 
     <!-- Pagination -->
-     <!-- move to reusable component across-->
-    <div
-      class="flex flex-col sm:flex-row justify-between items-center mt-4 space-y-2 sm:space-y-0"
-    >
-      <button
-        :disabled="currentPage <= 1"
-        @click="changePage(currentPage - 1)"
-        class="w-full sm:w-auto bg-gray-300 text-gray-700 py-1 px-3 rounded hover:bg-gray-400 disabled:opacity-50"
-      >
-        Previous
-      </button>
-      <span class="text-sm">Page {{ currentPage }} of {{ totalPages }}</span>
-      <button
-        :disabled="currentPage >= totalPages"
-        @click="changePage(currentPage + 1)"
-        class="w-full sm:w-auto bg-gray-300 text-gray-700 py-1 px-3 rounded hover:bg-gray-400 disabled:opacity-50"
-      >
-        Next
-      </button>
-    </div>
+    <!-- move to reusable component across-->
+    <Pagination :items="mills" :itemsPerPage="5" @pageChange="updateMills" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import Pagination from "./pagination.vue";
+import { ref, onMounted } from "vue";
 import { fetchMillData } from "../utils/dataService";
 
 const mills = ref([]);
-const currentPage = ref(1);
-const itemsPerPage = ref(5);
-const totalPages = computed(() =>
-  Math.ceil(mills.value.length / itemsPerPage.value)
-);
+const paginatedMills = ref([]);
 
-const paginatedMills = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  return mills.value.slice(start, end);
-});
+const updateMills = (items) => {
+  paginatedMills.value = items;
+};
 
 const fetchMills = async () => {
   const data = await fetchMillData();
@@ -204,10 +181,6 @@ const openEditModal = (mill) => {
 
 const deleteMill = (millName) => {
   //logic to delete
-};
-
-const changePage = (newPage) => {
-  currentPage.value = newPage;
 };
 
 onMounted(() => {
