@@ -1,7 +1,7 @@
 <template>
   <div class="h-screen w-full">
     <!-- Loading Screen -->
-    <LoadingScreen v-if="isLoading" :msg="'fetching, please wait'" />
+    <LoadingScreen v-if="isLoading" :msg="'Fetching, please wait'" />
 
     <!-- Map Container -->
     <div id="map" class="h-full w-full"></div>
