@@ -1,10 +1,7 @@
 <template>
   <div class="h-screen w-full">
     <!-- Loading Screen -->
-    <!-- <LoadingScreen
-      v-if="isLoading"
-      :msg="'Please wait ...'"
-    /> -->
+    <LoadingScreen v-if="isLoading" :msg="'fetching, please wait'" />
 
     <!-- Map Container -->
     <div id="map" class="h-full w-full"></div>
@@ -16,7 +13,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { onMounted, ref } from "vue";
 import api from "../composables/apiService";
-// import LoadingScreen from "./loadingScreen.vue";
+import LoadingScreen from "./loadingScreen.vue";
 import { fetchMillData } from "../utils/dataService";
 import { useNotifications } from "../composables/globalAlert";
 
@@ -33,7 +30,7 @@ const { notify } = useNotifications();
 const mills = ref([]);
 let map = null;
 
-// const isLoading = ref(true);
+const isLoading = ref(true);
 
 // Set default marker icons
 const setMarkerIcons = () => {
@@ -175,34 +172,24 @@ const addPKSDumpsite = (lat, lng) => {
 };
 
 // Fetch mill data and initialize map
+
 onMounted(async () => {
   try {
     mills.value = await fetchMillData(); // Fetch mill data from API
     setMarkerIcons(); // Set the marker icons
     initializeMap(); // Initialize map with markers
+
+    // event listener for when the map's tiles are loaded
+    map.whenReady(() => {
+      setTimeout(() => {
+        isLoading.value = false;
+      }, 500); // Small delay to ensure smooth transition
+    });
   } catch (error) {
-    console.log('error:', error)
-    notify("Failed to initialize map", "error"); // Show error notification if fetching mills fails
+    notify("Failed to initialize map", "error");
+    isLoading.value = false;
   }
 });
-// onMounted(async () => {
-//   try {
-//     mills.value = await fetchMillData(); // Fetch mill data from API
-//     setMarkerIcons(); // Set the marker icons
-//     initializeMap(); // Initialize map with markers
-
-//     // event listener for when the map's tiles are loaded
-//     map.whenReady(() => {
-//       setTimeout(() => {
-//         isLoading.value = false;
-//       }, 500); // Small delay to ensure smooth transition
-//     });
-//   } catch (error) {
-//     console.log("error:", error);
-//     // notify("Failed to initialize map", "error");
-//     isLoading.value = false;
-//   }
-// });
 </script>
 
 <style scoped>
