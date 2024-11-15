@@ -397,7 +397,6 @@ const handleDeleteDumpsite = async () => {
     closeDeleteModal();
     handleFetchDumpsites();
   } catch (error) {
-    console.log("error:", error);
     notify("Failed to delete dumpsite", "error");
   } finally {
     isLoading.value = false;
