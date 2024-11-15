@@ -1,11 +1,7 @@
-Here’s the extended version of your `README.md` with clear instructions on how to start the app and install dependencies:
-
-````markdown
-# PKS Map Manager (Frontend)
+# Interactive Web App for Mills and PKS Dumpsites: FrontEnd
 
 ## Description
-
-PKS Map Manager (Frontend) is a web application that allows users to interact with a map of mills and PKS dumpsites. The app uses Leaflet for map visualization, with markers for mills and dumpsites, and allows users to add and edit dumpsite information. The frontend is designed to be responsive, with a clean and accessible user interface using Vue.js, Tailwind CSS, and Axios.
+An interactive, responsive web app that displays and manages a set of map markers for mills and Palm Kernel Shell (PKS) dumpsites.
 
 The app is hosted on Netlify: [Live Site](https://releaf-demo.netlify.app)
 
@@ -36,7 +32,6 @@ Clone the repository to your local machine:
 ```bash
 git clone https://github.com/Ejay02/releaf_fe.git
 ```
-````
 
 ### 2. Install dependencies
 
