@@ -4,10 +4,42 @@
     <LoadingScreen v-if="isLoading" :msg="'Loading mills data'" />
 
     <div class="v-else">
+      <!-- Header with Search -->
       <div
         class="flex flex-col sm:flex-row justify-between items-center mb-4 space-y-2 sm:space-y-0"
       >
-        <h2 class="text-xl font-bold">Mills List</h2>
+        <div class="flex items-center space-x-4 w-full sm:w-auto">
+          <!-- Search Input -->
+          <div class="relative flex-1 sm:max-w-xs">
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search mills..."
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              @input="handleSearch"
+            />
+            <span
+              v-if="searchQuery"
+              @click="clearSearch"
+              class="absolute right-3 top-2.5 cursor-pointer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-gray-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <!-- add -->
         <button
           @click="openAddModal"
           class="w-full sm:w-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
@@ -45,7 +77,11 @@
               </div>
 
               <!-- del -->
-              <div class="" @click="deleteMill(mill.millName)">
+              <div
+                class=""
+                @click="showDeleteModal('001', mill.millName, 'mill')"
+              >
+                <!-- @click="deleteMill(mill.millName)" -->
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -130,7 +166,10 @@
                 </div>
 
                 <!-- del -->
-                <div class="" @click="deleteMill(mill.millName)">
+                <div
+                  class=""
+                  @click="showDeleteModal('001', mill.millName, 'mill')"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -164,11 +203,14 @@ import { ref, onMounted } from "vue";
 import Pagination from "./pagination.vue";
 import LoadingScreen from "./loadingScreen.vue";
 import { fetchMillData } from "../utils/dataService";
+import { useModalStore } from "../stores/useModalStore";
 
 const mills = ref([]);
 const paginatedMills = ref([]);
-
+const searchQuery = ref("");
 const isLoading = ref(true);
+
+const modalStore = useModalStore();
 
 const updateMills = (items) => {
   paginatedMills.value = items;
@@ -194,8 +236,12 @@ const openEditModal = (mill) => {
   // Logic to open edit modal
 };
 
-const deleteMill = (millName) => {
-  //logic to delete
+const showDeleteModal = (id, title, type) => {
+  modalStore.deleteModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.source = type;
+  // modalStore.modalSource = source;
 };
 
 onMounted(() => {

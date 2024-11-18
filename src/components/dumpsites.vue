@@ -4,11 +4,42 @@
     <LoadingScreen v-if="isLoading" :msg="'Loading dumpsite data'" />
 
     <div class="v-else">
-      <!-- Header -->
+      <!-- Header with Search -->
       <div
         class="flex flex-col sm:flex-row justify-between items-center mb-4 space-y-2 sm:space-y-0"
       >
-        <h2 class="text-xl font-bold">Dumpsites List</h2>
+        <div class="flex items-center space-x-4 w-full sm:w-auto">
+          <!-- Search Input -->
+          <div class="relative flex-1 sm:max-w-xs">
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search dumpsites..."
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              @input="handleSearch"
+            />
+            <span
+              v-if="searchQuery"
+              @click="clearSearch"
+              class="absolute right-3 top-2.5 cursor-pointer"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-gray-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <!-- add -->
         <button
           @click="openAddModal()"
           class="w-full sm:w-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
@@ -52,7 +83,11 @@
                 </svg>
               </div>
               <!-- del -->
-              <div class="" @click="openDeleteModal(dumpsite)">
+              <div
+                class=""
+                @click="showDeleteModal(dumpsite._id, 'dumpsite', 'dumpsite')"
+              >
+                <!-- @click="openDeleteModal(dumpsite)" -->
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -137,7 +172,10 @@
                   </svg>
                 </div>
 
-                <div class="" @click="openDeleteModal(dumpsite)">
+                <div
+                  class=""
+                  @click="showDeleteModal(dumpsite._id, null, 'dumpsite')"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -236,7 +274,7 @@
               :class="[
                 'w-full py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
                 isDisabled
-                  ? 'bg-gray-400 cursor-not-allowed'
+                  ? 'bg-gray-400 cursor-not-allowed text-gray-300'
                   : 'bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600',
               ]"
             >
@@ -247,51 +285,25 @@
       </div>
     </div>
     <!-- ?? ideally, all these should be in their individual component -->
-    <!-- Delete Modal -->
-    <div
-      v-if="showDeleteModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
-    >
-      <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 class="text-lg font-bold mb-4">Confirm Deletion</h3>
-        <p class="mb-4">Are you sure you want to delete this dumpsite?</p>
-
-        <div class="flex justify-end space-x-2 mt-4">
-          <button
-            type="button"
-            @click="closeDeleteModal"
-            class="bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            @click="handleDeleteDumpsite"
-            class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import Pagination from "./pagination.vue";
 import api from "../composables/apiService";
-import { ref, computed, onMounted } from "vue";
-import { useNotifications } from "../composables/globalAlert";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import LoadingScreen from "./loadingScreen.vue";
+import { useModalStore } from "../stores/useModalStore";
+import { useNotifications } from "../composables/globalAlert";
 
 const dumpsites = ref([]);
+const searchQuery = ref("");
 const isLoading = ref(false);
 const paginatedDumpsites = ref([]);
 const showModal = ref(false);
 const isEditing = ref(false);
 const editingId = ref(null);
-const showDeleteModal = ref(false);
-const selectedDumpsiteId = ref(null);
+// const selectedDumpsiteId = ref(null);
 const formData = ref({
   latitude: 0,
   longitude: 0,
@@ -299,6 +311,7 @@ const formData = ref({
   status: "active",
 });
 
+const modalStore = useModalStore();
 const { notify } = useNotifications();
 
 const token = localStorage.getItem("accessToken");
@@ -373,34 +386,11 @@ const handleFormSubmit = async () => {
   }
 };
 
-const openDeleteModal = (dumpsite) => {
-  selectedDumpsiteId.value = dumpsite?._id;
-  showDeleteModal.value = true;
-};
-
-const closeDeleteModal = () => {
-  showDeleteModal.value = false;
-  selectedDumpsiteId.value = null;
-};
-
-const handleDeleteDumpsite = async () => {
-  isLoading.value = true;
-  try {
-    await api.delete(`/dumpsites/${selectedDumpsiteId.value}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    dumpsites.value = dumpsites.value.filter(
-      (dumpsite) => dumpsite.id !== selectedDumpsiteId.value
-    );
-
-    notify("Dumpsite deleted", "success");
-    closeDeleteModal();
-    handleFetchDumpsites();
-  } catch (error) {
-    notify("Failed to delete dumpsite", "error");
-  } finally {
-    isLoading.value = false;
-  }
+const showDeleteModal = (id, title, type) => {
+  modalStore.deleteModal = true;
+  modalStore.modalId = id;
+  modalStore.modalTitle = title;
+  modalStore.source = type;
 };
 
 const handleEditDumpsite = async (_id, updatedData) => {
@@ -453,6 +443,21 @@ const isDisabled = computed(() => {
 
 onMounted(() => {
   handleFetchDumpsites();
+
+  // Add event listener for deletion
+  window.addEventListener("itemDeleted", (event) => {
+    if (event.detail.source === "dumpsite") {
+      // Remove the deleted dumpsite from the local state
+      dumpsites.value = dumpsites.value.filter(
+        (dumpsite) => dumpsite._id !== event.detail.id
+      );
+    }
+  });
+});
+
+// clean up the event listener
+onUnmounted(() => {
+  window.removeEventListener("itemDeleted");
 });
 
 // #TODO: refactor code, move modals/pages to individual components, addLoading screen, error etc when im free
