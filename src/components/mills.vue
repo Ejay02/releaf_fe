@@ -11,7 +11,7 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search mills..."
-            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            class="cursor-pointer w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
             @input="handleSearch"
           />
           <span
@@ -44,7 +44,7 @@
 
       <div class="overflow-x-auto">
         <table
-          class="w-full bg-white border border-gray-200 rounded-lg shadow-sm"
+          class="w-full bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer"
         >
           <thead class="hidden sm:table-header-group bg-gray-100">
             <tr>
@@ -62,7 +62,7 @@
             <tr
               v-for="mill in paginatedMills"
               :key="mill.millName"
-              class="border-b hover:bg-gray-50 flex flex-col sm:table-row"
+              class="border-b hover:bg-gray-50 flex flex-col sm:table-row text-gray-500"
             >
               <td class="py-2 px-4 sm:table-cell" data-label="Latitude">
                 {{ mill.millName }}
@@ -165,7 +165,13 @@ const handleFetchMills = async () => {
   try {
     isLoading.value = true;
     const data = await fetchMillData();
-    mills.value = data;
+    // mills.value = data;
+
+    // sort, latest ontop 
+    mills.value = data.sort(
+      (a, b) =>
+        new Date(b.lastTransactionDate) - new Date(a.lastTransactionDate)
+    );
   } catch (error) {
     notify("Failed to fetch mills data", "error");
   } finally {

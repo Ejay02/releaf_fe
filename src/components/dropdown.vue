@@ -1,7 +1,9 @@
 <template>
   <div>
     <!-- profile -->
-    <div class="flex px-4 py-2 hover:bg-indigo-200">
+    <div
+      class="flex px-4 py-2 hover:bg-indigo-200 text-gray-500 cursor-pointer"
+    >
       <div class="mr-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -22,7 +24,9 @@
     </div>
 
     <!-- setting -->
-    <div class="px-4 py-2 hover:bg-indigo-200 flex items-center">
+    <div
+      class="px-4 py-2 hover:bg-indigo-200 flex items-center text-gray-500 cursor-pointer"
+    >
       <div class="mr-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -48,7 +52,9 @@
     </div>
 
     <!-- logout -->
-    <div class="flex items-center text-left px-4 py-2 hover:bg-indigo-200">
+    <div
+      class="flex items-center text-left px-4 py-2 hover:bg-indigo-200 text-gray-500 cursor-pointer"
+    >
       <div class="mr-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
