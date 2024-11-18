@@ -4,6 +4,7 @@
 An interactive, responsive web app that displays and manages a set of map markers for mills and Palm Kernel Shell (PKS) dumpsites.
 
 The app is hosted on Netlify: [Live Site](https://releaf-demo.netlify.app)
+- Use a dummy email to create an account to access the app.
 
 
  ## Frontend Architecture
@@ -58,6 +59,14 @@ npm run build
 ```
 
 This will create a `dist/` folder with optimized production-ready files.
+
+#### Preview
+To preview the production build, run:
+```bash
+npm run preview
+```
+
+This command will start a local server, serving the contents of the dist/ folder, allowing you to test and verify the production-ready build.
 
 ## Acknowledgments
 
