@@ -87,7 +87,6 @@
                 class=""
                 @click="showDeleteModal(dumpsite._id, 'dumpsite', 'dumpsite')"
               >
-                <!-- @click="openDeleteModal(dumpsite)" -->
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -291,9 +290,9 @@
 <script setup>
 import Pagination from "./pagination.vue";
 import api from "../composables/apiService";
-import { ref, computed, onMounted, onUnmounted } from "vue";
 import LoadingScreen from "./loadingScreen.vue";
 import { useModalStore } from "../stores/useModalStore";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useNotifications } from "../composables/globalAlert";
 
 const dumpsites = ref([]);
@@ -303,7 +302,7 @@ const paginatedDumpsites = ref([]);
 const showModal = ref(false);
 const isEditing = ref(false);
 const editingId = ref(null);
-// const selectedDumpsiteId = ref(null);
+
 const formData = ref({
   latitude: 0,
   longitude: 0,
@@ -315,6 +314,15 @@ const modalStore = useModalStore();
 const { notify } = useNotifications();
 
 const token = localStorage.getItem("accessToken");
+
+// Event handler function defined separately so it can be referenced in cleanup
+const handleItemDeleted = (event) => {
+  if (event.detail.source === "dumpsite") {
+    dumpsites.value = dumpsites.value.filter(
+      (dumpsite) => dumpsite._id !== event.detail.id
+    );
+  }
+};
 
 const updateDumpsites = (items) => {
   paginatedDumpsites.value = items;
@@ -331,11 +339,11 @@ const getStatusColor = (status) => {
 const handleFetchDumpsites = async () => {
   isLoading.value = true;
   try {
-    const response = await api.get("/dumpsites", {
+    const res = await api.get("/dumpsites", {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    dumpsites.value = response.data;
+    dumpsites.value = res.data;
   } catch (error) {
     notify("Failed to load dumpsite", "error");
   } finally {
@@ -396,11 +404,11 @@ const showDeleteModal = (id, title, type) => {
 const handleEditDumpsite = async (_id, updatedData) => {
   try {
     isLoading.value = true;
-    const response = await api.put(`/dumpsites/${_id}`, updatedData, {
+    const res = await api.put(`/dumpsites/${_id}`, updatedData, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const index = dumpsites.value.findIndex((d) => d._id === _id);
-    dumpsites.value[index] = response.data;
+    dumpsites.value[index] = res.data;
     notify("Dumpsite edited successfully", "success");
   } catch (error) {
     notify("Failed to edit dumpsite", "error");
@@ -412,7 +420,7 @@ const handleEditDumpsite = async (_id, updatedData) => {
 const handleCreateDumpsite = async () => {
   try {
     isLoading.value = true;
-    const response = await api.post(
+    const res = await api.post(
       "/dumpsites",
       {
         latitude: formData.value.latitude,
@@ -425,7 +433,7 @@ const handleCreateDumpsite = async () => {
       }
     );
     notify("Dumpsite created successfully", "success");
-    dumpsites.value.push(response.data);
+    dumpsites.value.push(res.data);
   } catch (error) {
     notify("Failed to create dumpsite", "error");
   } finally {
@@ -441,23 +449,37 @@ const isDisabled = computed(() => {
   );
 });
 
+const handleSearch = () => {
+  if (!searchQuery.value) {
+    handleFetchDumpsites();
+    return;
+  }
+
+  const query = searchQuery.value.toLowerCase();
+  dumpsites.value = dumpsites.value.filter(
+    (dumpsite) =>
+      dumpsite.latitude.toString().includes(query) ||
+      dumpsite.longitude.toString().includes(query) ||
+      dumpsite.capacity.toString().includes(query) ||
+      dumpsite.status.toLowerCase().includes(query)
+  );
+};
+
+const clearSearch = () => {
+  searchQuery.value = "";
+  handleFetchDumpsites();
+};
+
 onMounted(() => {
   handleFetchDumpsites();
 
-  // Add event listener for deletion
-  window.addEventListener("itemDeleted", (event) => {
-    if (event.detail.source === "dumpsite") {
-      // Remove the deleted dumpsite from the local state
-      dumpsites.value = dumpsites.value.filter(
-        (dumpsite) => dumpsite._id !== event.detail.id
-      );
-    }
-  });
+  // Add event listener with named handler function
+  window.addEventListener("itemDeleted", handleItemDeleted);
 });
 
 // clean up the event listener
 onUnmounted(() => {
-  window.removeEventListener("itemDeleted");
+  window.removeEventListener("itemDeleted", handleItemDeleted);
 });
 
 // #TODO: refactor code, move modals/pages to individual components, addLoading screen, error etc when im free
