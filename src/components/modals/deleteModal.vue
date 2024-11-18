@@ -62,8 +62,8 @@
 <script setup>
 import { computed, ref } from "vue";
 import api from "../../composables/apiService";
-import { useNotifications } from "../../composables/globalAlert";
 import { useModalStore } from "../../stores/useModalStore";
+import { useNotifications } from "../../composables/globalAlert";
 
 const isLoading = ref(false);
 const modalStore = useModalStore();
@@ -106,15 +106,14 @@ const handleDelete = async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    // // Emit an event with the source type so components can handle their own updates
+    // Emit an event with the source type so components can handle their own updates
     window.dispatchEvent(
       new CustomEvent("itemDeleted", {
         detail: { id: modalStore.modalId, source: modalStore.source },
       })
     );
     notify(`${modalStore.source} deleted successfully`, "success");
-    emit("deleted", { id: modalStore.modalId, source: modalStore.source });
-    // emit("deleted", modalStore.modalId);
+
     modalStore.deleteModal = false;
   } catch (error) {
     const message =
