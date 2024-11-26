@@ -117,7 +117,13 @@ const handleSignUp = async () => {
       router.push("/");
     }
   } catch (error) {
-    notify("Signup Error", "error");
+    const errorMessage =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      "An error occurred during login";
+
+    notify(errorMessage, "error");
   } finally {
     isLoading.value = false;
   }

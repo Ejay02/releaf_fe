@@ -142,7 +142,7 @@
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
     >
       <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 class="text-lg font-bold mb-4">
+        <h3 class="text-lg font-bold mb-4 text-center">
           {{ isEditing ? "Edit Dumpsite" : "Add New Dumpsite" }}
         </h3>
         <form @submit.prevent="handleFormSubmit" class="space-y-4">
@@ -262,8 +262,8 @@ const updateDumpsites = (items) => {
 
 const getStatusColor = (status) => {
   return status === "active"
-    ? "bg-green-200 text-green-600"
-    : "bg-gray-200 text-gray-600";
+    ? "bg-green-100 text-green-800"
+    : "bg-gray-200 text-gray-400";
 };
 
 const handleFetchDumpsites = async () => {

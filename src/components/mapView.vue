@@ -26,11 +26,13 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 // Use notifications for success/error messages
 const { notify } = useNotifications();
 
-// Define mills data and map reference
+// Define mills and dumpsites data and map reference
 const mills = ref([]);
+const dumpsites = ref([]);
 let map = null;
 
 const isLoading = ref(true);
+const token = localStorage.getItem("accessToken");
 
 // Set default marker icons
 const setMarkerIcons = () => {
@@ -42,14 +44,37 @@ const setMarkerIcons = () => {
   });
 };
 
-// Get status color based on last transaction date
-const getStatusColor = (lastTransactionDate) => {
+// Get status color based on last transaction date for mills
+const getMillStatusColor = (lastTransactionDate) => {
   const diffDays =
     (new Date() - new Date(lastTransactionDate)) / (1000 * 60 * 60 * 24);
   return diffDays <= 7 ? "green" : diffDays <= 14 ? "yellow" : "red";
 };
 
-// Initialize map and add markers for mills
+// Create a custom pink marker icon for dumpsites
+const createPinkMarkerIcon = () => {
+  return L.divIcon({
+    className: "custom-pin-marker",
+    html: `
+      <div style="position: relative; width: 20px; height: 20px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 40">
+          <path 
+            d="M15 0 C7.5 0 0 6 0 15 C0 22 15 40 15 40 C15 40 30 22 30 15 C30 6 22.5 0 15 0 Z" 
+            fill="purple" 
+            stroke="darkpink" 
+            stroke-width="2"
+          />
+          <circle cx="15" cy="12" r="5" fill="white" />
+        </svg>
+      </div>
+    `,
+    iconSize: [30, 40],
+    iconAnchor: [15, 40],
+    popupAnchor: [0, -40],
+  });
+};
+
+// Initialize map and add markers for mills and dumpsites
 const initializeMap = () => {
   map = L.map("map").setView([5.587366, 8.133794], 13); // Set initial view of the map
 
@@ -62,6 +87,11 @@ const initializeMap = () => {
     addMillMarker(mill);
   });
 
+  // Add dumpsite markers to the map
+  dumpsites.value.forEach((dumpsite) => {
+    addDumpsiteMarker(dumpsite);
+  });
+
   // Add click event to map for adding PKS dumpsites
   map.on("click", (e) => {
     const { lat, lng } = e.latlng;
@@ -72,7 +102,7 @@ const initializeMap = () => {
 // Add mill marker with status and popup content
 const addMillMarker = (mill) => {
   const marker = L.marker([mill.latitude, mill.longitude]).addTo(map);
-  const statusColor = getStatusColor(mill.lastTransactionDate);
+  const statusColor = getMillStatusColor(mill.lastTransactionDate);
 
   // Create the popup content for each mill
   const popupContent = `
@@ -94,6 +124,33 @@ const addMillMarker = (mill) => {
         }</p>
         <p><span class="font-semibold">Last Transaction:</span> ${new Date(
           mill.lastTransactionDate
+        ).toLocaleDateString()}</p>
+      </div>
+    </div>
+  `;
+
+  // Bind the popup to the marker
+  marker.bindPopup(popupContent);
+};
+
+// Add dumpsite marker with popup content
+const addDumpsiteMarker = (dumpsite) => {
+  const pinkIcon = createPinkMarkerIcon();
+  const marker = L.marker([dumpsite.latitude, dumpsite.longitude], {
+    icon: pinkIcon,
+  }).addTo(map);
+
+  // Create popup content for dumpsite
+  const popupContent = `
+    <div class="p-2">
+      <h3 class="font-bold text-sm mb-2">PKS Dumpsite</h3>
+      <div class="space-y-1">
+        <p><span class="font-semibold">Capacity:</span> ${
+          dumpsite.capacity
+        } tons</p>
+        <p><span class="font-semibold">Status:</span> ${dumpsite.status}</p>
+        <p><span class="font-semibold">Created:</span> ${new Date(
+          dumpsite.createdAt
         ).toLocaleDateString()}</p>
       </div>
     </div>
@@ -149,8 +206,6 @@ const addPKSDumpsite = (lat, lng) => {
           status: formData.get("status"),
         };
 
-        const token = localStorage.getItem("accessToken");
-
         try {
           // Make a POST request to save the dumpsite data
           const res = await api.post("/dumpsites", dumpsiteData, {
@@ -162,6 +217,9 @@ const addPKSDumpsite = (lat, lng) => {
           if (res.data) {
             notify("Dumpsite created successfully", "success");
             marker.closePopup(); // Close popup after form submission
+
+            // Fetch updated dumpsites and refresh map markers
+            await fetchDumpsites();
           }
         } catch (error) {
           notify("Error saving dumpsite", "error");
@@ -171,11 +229,41 @@ const addPKSDumpsite = (lat, lng) => {
   }, 100);
 };
 
-// Fetch mill data and initialize map
+// Fetch dumpsite data
+const fetchDumpsites = async () => {
+  try {
+    const res = await api.get("/dumpsites", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
+    // Sort dumpsites by createdAt in descending order (latest first)
+    dumpsites.value = res.data.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    // If map is already initialized, remove existing dumpsite markers and re-add
+    if (map) {
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Marker) {
+          map.removeLayer(layer);
+        }
+      });
+
+      // Re-add mill and dumpsite markers
+      mills.value.forEach((mill) => addMillMarker(mill));
+      dumpsites.value.forEach((dumpsite) => addDumpsiteMarker(dumpsite));
+    }
+  } catch (error) {
+    notify("Failed to load dumpsites", "error");
+  }
+};
+
+// Fetch mill data and initialize map
 onMounted(async () => {
   try {
     mills.value = await fetchMillData(); // Fetch mill data from API
+    await fetchDumpsites(); // Fetch dumpsite data
+
     setMarkerIcons(); // Set the marker icons
     initializeMap(); // Initialize map with markers
 
