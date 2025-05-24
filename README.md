@@ -1,4 +1,4 @@
-# Interactive Web App for Mills and PKS Dumpsites: FrontEnd
+# Interactive Web App for Mills and PKS Dumpsites: FrontEnd- Vuejs 3
 
 ## Description
 An interactive, responsive web app that displays and manages a set of map markers for mills and Palm Kernel Shell (PKS) dumpsites.
